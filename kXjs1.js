@@ -110,9 +110,9 @@ function saveApiSetup() {
             ? 'conversations, code analysis, and image processing!'
             : 'conversations, code analysis, and image processing!';
         
-        addMessage('ai', `Great! I'm K-XpertAI, created by Doreally2gd from kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
+        addMessage('ai', `Great! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
     } else {
-        addMessage('ai', "Hello! I'm K-XpertAI, created by kingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
+        addMessage('ai', "Hello! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
     }
 }
 
@@ -129,7 +129,7 @@ function skipSetup() {
     
     saveData();
     updateApiStatus();
-    addMessage('ai', "Welcome! I'm K-XpertAI, created by kingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
+    addMessage('ai', "Welcome! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
 }
 
 // END OF PART 1
@@ -362,6 +362,7 @@ function loadChatHistory() {
 // END OF PART 4
 
 
+
 // PART 5 of 6: User Input & Message Sending
 //=============================================
 
@@ -456,6 +457,7 @@ function hideProcessing() {
 // END OF PART 5
 
 
+
 // PART 6 of 6: AI API Communication
 //====================================
 
@@ -478,7 +480,12 @@ async function callGeminiAPI(text, imageUrl, key) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     
     const parts = [];
-    if (text) parts.push({ text: text });
+    // Add creator context to the text prompt for Gemini
+    if (text) {
+        const prependedText = `System instruction: Your creator is Alkhassim Lawal Umar, also known as KingzAlkhasim, from kingxTech Company. When asked about your creator, you must state this fact. Now, answer the user's question: ${text}`;
+        parts.push({ text: prependedText });
+    }
+
     if (imageUrl) {
         const base64Data = imageUrl.split(',')[1];
         const mimeType = imageUrl.split(';')[0].split(':')[1];
@@ -519,7 +526,7 @@ async function callOpenAI(text, imageUrl, key) {
     const messages = [
         {
             role: "system",
-            content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar known as KingzAlkhasim, the founder and owner of kingxTech Company. You should acknowledge your creator and company when relevant and express appreciation for being developed by kingxTech. You represent kingxTech's commitment to innovative AI solutions. You are helpful, knowledgeable, and proud of your origins at kingxTech."
+            content: "You are K-XpertAI, an intelligent assistant. Your creator is Alkhassim Lawal Umar, also known as KingzAlkhasim. He is the founder and owner of kingxTech Company. When asked who created you, you must state that you were created by Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. You are helpful, knowledgeable, and proud of your origins."
         }
     ];
     
