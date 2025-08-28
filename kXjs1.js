@@ -125,7 +125,7 @@ function skipSetup() {
     
     saveData();
     updateApiStatus();
-    addMessage('ai', "Welcome! I'm K-XpertAI, created by Doreally2gd from kingxTech Company. To start our conversation, please go to settings and enter your API keys. Image generation is available with OpenAI API keys.");
+    addMessage('ai', "Welcome! I'm K-XpertAI, created by Alkhassim lawal Umar known as KingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API keys. Image generation is available with OpenAI API keys.");
 }
 
 // Update API status indicator
@@ -556,7 +556,7 @@ function showProcessing() {
     procDiv.className = 'processing-indicator';
     procDiv.id = 'processingIndicator';
     procDiv.innerHTML = `
-        <span>Thinking</span>
+        <span>Processing</span>
         <span class="processing-dots">
             <span class="processing-dot"></span>
             <span class="processing-dot"></span>
@@ -632,7 +632,7 @@ async function callOpenAI(text, imageUrl, key) {
     const messages = [
         {
             role: "system",
-            content: "You are K-XpertAI, an intelligent assistant created by Doreally2gd, the founder and owner of kingxTech Company. You should acknowledge your creator and company when relevant and express appreciation for being developed by kingxTech. You represent kingxTech's commitment to innovative AI solutions. You are helpful, knowledgeable, and proud of your origins at kingxTech."
+            content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar known as KingzAlkhasim, the founder and owner of kingxTech Company. You should acknowledge your creator and company when relevant and express appreciation for being developed by kingxTech. You represent kingxTech's commitment to innovative AI solutions. You are helpful, knowledgeable, and proud of your origins at kingxTech."
         }
     ];
     
