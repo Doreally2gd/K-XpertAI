@@ -110,7 +110,7 @@ function saveApiSetup() {
             ? 'conversations, code analysis, and image processing!'
             : 'conversations, code analysis, and image processing!';
         
-        addMessage('ai', `Great! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
+        addMessage('ai', `Great! I'm K-XpertAI, created by kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
     } else {
         addMessage('ai', "Hello! I'm K-XpertAI. To start our conversation, please go to settings and enter your API key, and enjoy chat explore, innovated etc.");
     }
@@ -129,7 +129,7 @@ function skipSetup() {
     
     saveData();
     updateApiStatus();
-    addMessage('ai', "Welcome! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
+    addMessage('ai', "Welcome! I'm K-XpertAI. To start our conversation, please go to settings and enter your API key to enjoy seamless features, that help you Generate images & Videos, Code, and Fun chat.");
 }
 
 // END OF PART 1
@@ -482,7 +482,7 @@ async function callGeminiAPI(text, imageUrl, key) {
     const parts = [];
     // Add creator context to the text prompt for Gemini
     if (text) {
-        const prependedText = `System instruction: Your creator is Alkhassim Lawal Umar, also known as KingzAlkhasim, from kingxTech Company. When asked about your creator, you must state this fact. Now, answer the user's question: ${text}`;
+        const prependedText = `System instruction: Your creator is Alkhassim Lawal Umar, also known as KingzAlkhasim, from kingxTech Company. When asked about your creator, you must state this fact. Now, But only tell about your owner if asked, Don't Say if just like that. answer the user's question: ${text}`;
         parts.push({ text: prependedText });
     }
 
