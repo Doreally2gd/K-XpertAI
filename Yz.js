@@ -456,7 +456,7 @@ function showProcessing() {
     procDiv.className = 'processing-indicator';
     procDiv.id = 'processingIndicator';
     procDiv.innerHTML = `
-        <span>Thinking</span>
+        <span>Processing</span>
         <span class="processing-dots">
             <span class="processing-dot"></span>
             <span class="processing-dot"></span>
