@@ -112,7 +112,7 @@ function saveApiSetup() {
         
         addMessage('ai', `Great! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
     } else {
-        addMessage('ai', "Hello! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
+        addMessage('ai', "Hello! I'm K-XpertAI. To start our conversation, please go to settings and enter your API key, and enjoy chat explore, innovated etc.");
     }
 }
 
