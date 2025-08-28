@@ -1,3 +1,6 @@
+// PART 1 of 6: Global Variables & Initial Setup
+//================================================
+
 // Global variables
 let apiKey = '';
 let apiProvider = 'gemini';
@@ -5,6 +8,7 @@ let currentTheme = 'light';
 let selectedImage = null;
 let chatHistory = [];
 let hasSeenSetup = false;
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     loadSavedData();
@@ -103,12 +107,12 @@ function saveApiSetup() {
     // Show appropriate message
     if (apiKey) {
         const capabilities = apiProvider === 'openai' 
-            ? 'conversations, code analysis, image processing, and image generation using DALL-E!'
+            ? 'conversations, code analysis, and image processing!'
             : 'conversations, code analysis, and image processing!';
         
         addMessage('ai', `Great! I'm K-XpertAI, created by Doreally2gd from kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
     } else {
-        addMessage('ai', "Hello! I'm K-XpertAI, created by Doreally2gd from kingxTech Company. To start our conversation, please go to settings and enter your API keys. Image generation is available with OpenAI API keys.");
+        addMessage('ai', "Hello! I'm K-XpertAI, created by kingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
     }
 }
 
@@ -125,15 +129,21 @@ function skipSetup() {
     
     saveData();
     updateApiStatus();
-    addMessage('ai', "Welcome! I'm K-XpertAI, created by Alkhassim lawal Umar known as KingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API keys. Image generation is available with OpenAI API keys.");
+    addMessage('ai', "Welcome! I'm K-XpertAI, created by kingzAlkhasim from kingxTech Company. To start our conversation, please go to settings and enter your API key.");
 }
+
+// END OF PART 1
+
+
+// PART 2 of 6: API Status & Settings Modal Logic
+//================================================
 
 // Update API status indicator
 function updateApiStatus() {
     const statusElement = document.getElementById('apiStatus');
     const providerElement = document.getElementById('apiProvider');
     
-    if (apiKey && apiKey !== 'auto-gemini') {
+    if (apiKey) {
         statusElement.style.display = 'flex';
         providerElement.textContent = apiProvider === 'gemini' ? 'Gemini' : 'OpenAI';
         statusElement.style.color = 'var(--success-color)';
@@ -150,7 +160,7 @@ function openSettings() {
     document.querySelectorAll('#settingsModal .api-option').forEach(opt => opt.classList.remove('selected'));
     document.getElementById(`settings${settingsProvider === 'gemini' ? 'Gemini' : 'OpenAI'}`).classList.add('selected');
     document.querySelector(`#settingsModal input[value="${settingsProvider}"]`).checked = true;
-    document.getElementById('settingsApiKey').value = (apiKey === 'auto-gemini' ? '' : apiKey) || '';
+    document.getElementById('settingsApiKey').value = apiKey || '';
     document.getElementById(`lightTheme`).classList.toggle('selected', currentTheme === 'light');
     document.getElementById(`darkTheme`).classList.toggle('selected', currentTheme === 'dark');
     document.querySelector(`#settingsModal input[value="${currentTheme}"]`).checked = true;
@@ -194,6 +204,12 @@ function saveSettings() {
     closeSettings();
 }
 
+// END OF PART 2
+
+
+// PART 3 of 6: Theme & Message Formatting
+//===========================================
+
 function toggleTheme() {
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.body.setAttribute('data-theme', currentTheme);
@@ -215,8 +231,7 @@ function processMessageContent(text) {
             const language = lang || 'plaintext';
             const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
             
-            // Format code with proper line breaks and indentation
-            const formattedCode = formatCodeStepByStep(code.trim());
+            const formattedCode = code.trim();
             
             return `<div class="code-block">
                 <div class="code-header">
@@ -249,40 +264,6 @@ function processMessageContent(text) {
     return processed;
 }
 
-// Format code step by step
-function formatCodeStepByStep(code) {
-    // Split code into lines
-    let lines = code.split('\n');
-    let formatted = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-        
-        // Add line numbers and proper spacing
-        if (line.trim()) {
-            // Add step comments for important lines
-            if (line.includes('function') || line.includes('const') || line.includes('let') || line.includes('var')) {
-                formatted.push(`// Step ${Math.floor(i/2) + 1}: ${getStepDescription(line)}`);
-            }
-            formatted.push(line);
-        } else {
-            formatted.push(line);
-        }
-    }
-    
-    return formatted.join('\n');
-}
-
-// Get step description for code lines
-function getStepDescription(line) {
-    if (line.includes('function')) return 'Define function';
-    if (line.includes('const') || line.includes('let') || line.includes('var')) return 'Declare variable';
-    if (line.includes('if')) return 'Conditional check';
-    if (line.includes('for') || line.includes('while')) return 'Loop structure';
-    if (line.includes('return')) return 'Return result';
-    return 'Execute operation';
-}
-
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -302,23 +283,25 @@ function copyCode(elementId) {
     });
 }
 
+// END OF PART 3
+
+
+// PART 4 of 6: Chat History & Message Display Logic
+//===================================================
+
 // Chat logic with enhanced formatting
-function addMessage(sender, text, imageUrl = null, isGenerated = false) {
+function addMessage(sender, text, imageUrl = null) {
     const chatMessages = document.getElementById('chatMessages');
     const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${sender}`;
     
-    // Process the text content for better formatting
     const processedText = sender === 'ai' ? processMessageContent(text) : escapeHtml(text);
     
     msgDiv.innerHTML = `
         <div class="message-avatar">${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}</div>
         <div class="message-content">
-            ${imageUrl ? `<div class="image-preview ${isGenerated ? 'generated-media' : ''}">
-                <img src="${imageUrl}" ${isGenerated ? 'class="generated-image"' : ''}>
-                ${isGenerated ? '<div class="media-label">Generated</div>' : ''}
-            </div>` : ''}
+            ${imageUrl ? `<div class="image-preview"><img src="${imageUrl}"></div>` : ''}
             <div>${processedText}</div>
             <div class="message-time">${time}</div>
         </div>
@@ -326,12 +309,11 @@ function addMessage(sender, text, imageUrl = null, isGenerated = false) {
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
-    // Highlight code after adding the message
     if (window.Prism) {
         Prism.highlightAllUnder(msgDiv);
     }
     
-    chatHistory.push({sender, text, imageUrl, time, isGenerated});
+    chatHistory.push({sender, text, imageUrl, time});
     saveData();
 }
 
@@ -340,7 +322,7 @@ function clearChat() {
     document.getElementById('chatMessages').innerHTML = `
         <div class="welcome-message">
             <h2 class="welcome-title">Welcome to K-XpertAI</h2>
-            <p>I'm K-XpertAI, your intelligent assistant. I can help with conversations, code analysis, image processing, and even generate images and videos! Please configure your API keys in settings to get started.</p>
+            <p>I'm K-XpertAI, your intelligent assistant. I can help with conversations, code analysis, and image processing. Please configure your API key in settings to get started.</p>
         </div>
     `;
     saveData();
@@ -362,17 +344,13 @@ function loadChatHistory() {
                 msgDiv.innerHTML = `
                     <div class="message-avatar">${msg.sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}</div>
                     <div class="message-content">
-                        ${msg.imageUrl ? `<div class="image-preview ${msg.isGenerated ? 'generated-media' : ''}">
-                            <img src="${msg.imageUrl}" ${msg.isGenerated ? 'class="generated-image"' : ''}>
-                            ${msg.isGenerated ? '<div class="media-label">Generated</div>' : ''}
-                        </div>` : ''}
+                        ${msg.imageUrl ? `<div class="image-preview"><img src="${msg.imageUrl}"></div>` : ''}
                         <div>${processedText}</div>
                         <div class="message-time">${time}</div>
                     </div>
                 `;
                 document.getElementById('chatMessages').appendChild(msgDiv);
-                
-                // Highlight code for each message
+
                 if (window.Prism) {
                     Prism.highlightAllUnder(msgDiv);
                 }
@@ -380,6 +358,12 @@ function loadChatHistory() {
         }
     }
 }
+
+// END OF PART 4
+
+
+// PART 5 of 6: User Input & Message Sending
+//=============================================
 
 // Input logic
 function handleKeyDown(event) {
@@ -423,7 +407,7 @@ function removeImage() {
     document.getElementById('fileInput').value = '';
 }
 
-// Enhanced message sending with image/video generation detection
+// Message sending
 async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
@@ -438,116 +422,13 @@ async function sendMessage() {
     
     showProcessing();
     try {
-        // Check if user is requesting image or video generation
-        if (isImageGenerationRequest(text)) {
-            const imageUrl = await generateImage(text);
-            hideProcessing();
-            addMessage('ai', 'Here\'s your generated image based on your prompt:', imageUrl, true);
-        } else if (isVideoGenerationRequest(text)) {
-            const videoUrl = await generateVideo(text);
-            hideProcessing();
-            addMessage('ai', 'Here\'s your generated video based on your prompt:', videoUrl, true);
-        } else {
-            const response = await getAiResponse(text, currentImage);
-            hideProcessing();
-            addMessage('ai', response);
-        }
+        const response = await getAiResponse(text, currentImage);
+        hideProcessing();
+        addMessage('ai', response);
     } catch (error) {
         hideProcessing();
         addMessage('ai', `I encountered an error: ${error.message}`);
     }
-}
-
-// Detect image generation requests
-function isImageGenerationRequest(text) {
-    const imageKeywords = [
-        'generate image', 'create image', 'make image', 'draw', 'generate picture',
-        'create picture', 'make picture', 'image of', 'picture of', 'generate photo',
-        'create photo', 'make photo', 'visualize', 'illustrate'
-    ];
-    return imageKeywords.some(keyword => text.toLowerCase().includes(keyword));
-}
-
-// Detect creator questions
-function detectCreatorQuestion(text) {
-    const creatorKeywords = [
-        'who created you', 'who made you', 'your creator', 'your developer', 
-        'who built you', 'your maker', 'who designed you', 'who are you',
-        'who developed you', 'your author', 'who wrote you', 'your owner',
-        'who owns you', 'what company', 'kingxtech', 'your company'
-    ];
-    return creatorKeywords.some(keyword => text.toLowerCase().includes(keyword));
-}
-
-// Detect video generation requests
-function isVideoGenerationRequest(text) {
-    const videoKeywords = [
-        'generate video', 'create video', 'make video', 'video of',
-        'animate', 'animation of', 'moving image', 'gif of'
-    ];
-    return videoKeywords.some(keyword => text.toLowerCase().includes(keyword));
-}
-
-// Image generation using Hugging Face API
-async function generateImage(prompt) {
-    if (!huggingFaceKey) {
-        throw new Error('HuggingFace API key not configured. Please add it in settings to generate images.');
-    }
-
-    const cleanPrompt = prompt.replace(/generate image|create image|make image|draw|image of|picture of/gi, '').trim();
-    
-    const response = await fetch('https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0', {
-        headers: {
-            'Authorization': `Bearer ${huggingFaceKey}`,
-            'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            inputs: cleanPrompt,
-            parameters: {
-                negative_prompt: "blurry, low quality, distorted",
-                num_inference_steps: 20,
-                guidance_scale: 7.5
-            }
-        }),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Image generation failed: ${error.error || response.statusText}`);
-    }
-
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-}
-
-// Video generation using Hugging Face API
-async function generateVideo(prompt) {
-    if (!huggingFaceKey) {
-        throw new Error('HuggingFace API key not configured. Please add it in settings to generate videos.');
-    }
-
-    const cleanPrompt = prompt.replace(/generate video|create video|make video|video of|animate|animation of/gi, '').trim();
-    
-    // Using a simpler approach - generate a GIF instead of video for better compatibility
-    const response = await fetch('https://api-inference.huggingface.co/models/facebook/detr-resnet-50', {
-        headers: {
-            'Authorization': `Bearer ${huggingFaceKey}`,
-            'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            inputs: cleanPrompt + " animated gif style",
-        }),
-    });
-
-    if (!response.ok) {
-        // Fallback: generate a static image instead
-        return await generateImage(cleanPrompt + " dynamic scene");
-    }
-
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
 }
 
 function showProcessing() {
@@ -556,7 +437,7 @@ function showProcessing() {
     procDiv.className = 'processing-indicator';
     procDiv.id = 'processingIndicator';
     procDiv.innerHTML = `
-        <span>Processing</span>
+        <span>Reasoning</span>
         <span class="processing-dots">
             <span class="processing-dot"></span>
             <span class="processing-dot"></span>
@@ -572,9 +453,15 @@ function hideProcessing() {
     if (procDiv) procDiv.remove();
 }
 
-// Enhanced AI response function
+// END OF PART 5
+
+
+// PART 6 of 6: AI API Communication
+//====================================
+
+// AI response function
 async function getAiResponse(text, imageUrl) {
-    if (!apiKey || apiKey === 'auto-gemini') {
+    if (!apiKey) {
         throw new Error('API key not configured. Please go to settings and enter your API key.');
     }
 
@@ -636,17 +523,15 @@ async function callOpenAI(text, imageUrl, key) {
         }
     ];
     
-    if (imageUrl) {
-        messages.push({
-            role: "user",
-            content: [
-                { type: "text", text: text },
-                { type: "image_url", image_url: { url: imageUrl } }
-            ]
-        });
-    } else {
-        messages.push({ role: "user", content: text });
+    const user_content = [];
+    if (text) {
+        user_content.push({ type: "text", text: text });
     }
+    if (imageUrl) {
+        user_content.push({ type: "image_url", image_url: { url: imageUrl } });
+    }
+    
+    messages.push({ role: "user", content: user_content });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -655,9 +540,9 @@ async function callOpenAI(text, imageUrl, key) {
             'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify({
-            model: imageUrl ? "gpt-4-vision-preview" : "gpt-4",
+            model: "gpt-4o", // Using gpt-4o as it handles both text and images efficiently
             messages: messages,
-            max_tokens: 1000
+            max_tokens: 1500
         })
     });
 
@@ -669,3 +554,5 @@ async function callOpenAI(text, imageUrl, key) {
     const data = await response.json();
     return data.choices[0].message.content;
 }
+
+// END OF PART 6
