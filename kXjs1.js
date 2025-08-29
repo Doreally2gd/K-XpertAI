@@ -105,9 +105,9 @@ function saveApiSetup() {
             ? 'conversations, code analysis, image processing, and image/video generation!'
             : 'conversations, code analysis, image processing, and image generation!';
         
-        addMessage('ai', `Great! I'm K-XpertAI. I'm connected via ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I can help with ${capabilities}`);
+        addMessage('ai', `Great! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. I'm connected via ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I can help with ${capabilities}`);
     } else {
-        addMessage('ai', "Hello! I'm K-XpertAI. To start, please go to settings and enter your API key.");
+        addMessage('ai', "Hello! I'm K-XpertAI, created by KingzAlkhasim. To start, please go to settings and enter your API key.");
     }
 }
 
@@ -286,7 +286,6 @@ function toggleCodeVisibility(codeId, button) {
     if (hiddenCode.style.display === 'none') {
         hiddenCode.style.display = 'inline';
         button.textContent = 'See Less';
-        // Re-highlight to fix numbering and styling
         const fullCodeElement = document.createElement('code');
         fullCodeElement.className = preElement.querySelector('code').className;
         fullCodeElement.textContent = preElement.textContent;
@@ -294,15 +293,13 @@ function toggleCodeVisibility(codeId, button) {
         preElement.appendChild(fullCodeElement);
         Prism.highlightElement(fullCodeElement);
     } else {
-        // This part is tricky; re-hiding is complex. Let's just expand.
-        // For simplicity, we'll just change the button text back.
-        // A full "See Less" would require more complex DOM manipulation.
         hiddenCode.style.display = 'none';
         button.textContent = 'See More';
     }
 }
 
 // END OF PART 4
+
 
 
 
@@ -352,7 +349,7 @@ function clearChat() {
     document.getElementById('chatMessages').innerHTML = `
         <div class="welcome-message">
             <h2 class="welcome-title">Welcome to K-XpertAI</h2>
-            <p>I'm your intelligent assistant, created by kingxTech. Ask me anything, request code, or ask me to generate an image or video!</p>
+            <p>I'm your intelligent assistant, created by KingzAlkhasim. Ask me anything, request code, or ask me to generate an image or video!</p>
         </div>
     `;
     saveData();
@@ -366,7 +363,6 @@ function loadChatHistory() {
         chatMessages.innerHTML = '';
         if (chatHistory.length > 0) {
             chatHistory.forEach(msg => {
-                // Re-call addMessage to reconstruct the chat history with proper formatting
                 addMessage(msg.sender, msg.text, msg.mediaUrl, msg.mediaType);
             });
         }
@@ -484,6 +480,7 @@ function hideProcessing() {
 // END OF PART 6
 
 
+
 // PART 7 of 8: Media Generation (Image & Video)
 //================================================
 
@@ -498,11 +495,14 @@ function isVideoGenerationRequest(text) {
 }
 
 async function generateImage(prompt) {
-    if (!apiKey) throw new Error("API key is not set.");
+    if (!apiKey && apiProvider === 'openai') {
+        throw new Error("OpenAI API key is not set. Please add it in settings.");
+    }
 
-    const cleanPrompt = prompt.replace(/generate image|create an image|draw a picture/gi, "").trim();
+    const cleanPrompt = prompt.replace(/generate image|create an image|draw a picture|make an image of|visualize/gi, "").trim();
     
     if (apiProvider === 'openai') {
+        // Use OpenAI DALL-E 3 API
         const response = await fetch('https://api.openai.com/v1/images/generations', {
             method: 'POST',
             headers: {
@@ -513,7 +513,8 @@ async function generateImage(prompt) {
                 model: "dall-e-3",
                 prompt: cleanPrompt,
                 n: 1,
-                size: "1024x1024"
+                size: "1024x1024",
+                quality: "hd"
             })
         });
         if (!response.ok) {
@@ -522,20 +523,30 @@ async function generateImage(prompt) {
         }
         const data = await response.json();
         return data.data[0].url;
-    } else { // Gemini
-        // NOTE: Gemini text-to-image is not available through this specific API endpoint.
-        // This is a placeholder for a potential future implementation.
-        // For now, we'll inform the user.
-        throw new Error("Image generation with the Gemini Pro API is not directly supported in this app yet. Please switch to the OpenAI provider for image generation.");
+    } else { 
+        // Use a free, public proxy for Google's Imagen model
+        // This allows image generation without needing a complex Vertex AI setup
+        const response = await fetch(
+            `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}`
+        );
+        if (!response.ok) {
+            throw new Error("Gemini (proxy) image generation failed.");
+        }
+        // The URL of the response is the image itself
+        return response.url;
     }
 }
 
 async function generateVideo(prompt) {
-    // Placeholder for video generation. Since OpenAI's Sora isn't public,
-    // we will inform the user and generate a dynamic image as a fallback.
-    addMessage('ai', "True text-to-video generation is highly experimental. As a fallback, I will create a dynamic, cinematic image based on your prompt using DALL-E 3.");
-    return await generateImage(prompt + ", cinematic, dynamic action scene, high detail");
+    // This feature is exclusive to OpenAI in this app
+    if (apiProvider !== 'openai') {
+        throw new Error("Video generation is only available with OpenAI. Please switch the provider in settings.");
+    }
+    // Inform user and fallback to a dynamic image with DALL-E 3
+    addMessage('ai', "True text-to-video is still experimental. I will generate a dynamic, cinematic image for you instead.");
+    return await generateImage(prompt + ", cinematic, dynamic action scene, high detail, 4k");
 }
+
 
 // END OF PART 7
 
@@ -562,7 +573,7 @@ async function callGeminiAPI(text, imageUrl, key) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     
     const parts = [];
-    const systemInstruction = `You are K-XpertAI. Your creator is Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. Only state this if asked. Your name means kingxTech Expert AI and owns you, amd you work for kingxTech.`;
+    const systemInstruction = `You are K-XpertAI. Your creator is Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. Only state this if asked. Your name means kingxTech Expert AI.`;
     
     if (text) parts.push({ text: `${systemInstruction}\n\nUser: ${text}` });
 
@@ -593,7 +604,7 @@ async function callGeminiAPI(text, imageUrl, key) {
 async function callOpenAI(text, imageUrl, key) {
     const messages = [{
         role: "system",
-        content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar (KingzAlkhasim), the founder of kingxTech Company. Your name means kingxTech Expert AI. You are helpful and proud of your origins,and you worked for kingxTech company. Only state who your creator is when specifically asked."
+        content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar (KingzAlkhasim), the founder of kingxTech Company. Your name means kingxTech Expert AI. You are helpful and proud of your origins. Only state who your creator is when specifically asked."
     }];
     
     const user_content = [];
