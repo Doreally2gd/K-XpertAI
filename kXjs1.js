@@ -480,18 +480,40 @@ function hideProcessing() {
 // END OF PART 6
 
 
-
 // PART 7 of 8: Media Generation (Image & Video)
 //================================================
 
 function isImageGenerationRequest(text) {
-    const keywords = ['generate image', 'create an image', 'draw a picture', 'make an image of', 'visualize'];
-    return keywords.some(kw => text.toLowerCase().includes(kw));
+    const lowerCaseText = text.toLowerCase();
+    // More robust keywords and phrasings
+    const keywords = [
+        'generate', 'create', 'make', 'draw', 'show me', 'give me', 'i need',
+        'image of', 'picture of', 'photo of', 'drawing of', 'painting of', 'render of',
+        'visualize'
+    ];
+    // Check if the prompt contains a keyword and also a word for "image"
+    const imageWords = ['image', 'picture', 'photo', 'drawing', 'painting', 'render', 'art'];
+
+    // This logic is more robust: it looks for an action keyword AND a subject word.
+    if (keywords.some(kw => lowerCaseText.includes(kw)) && imageWords.some(img => lowerCaseText.includes(img))) {
+        return true;
+    }
+    // Also catch direct phrases like "a cat flying a spaceship" which imply image generation
+    if (!text.includes('?')) { // Don't trigger on questions
+        const startsWithArticle = ['a ', 'an ', 'the '].some(prefix => lowerCaseText.startsWith(prefix));
+        if (startsWithArticle && text.split(' ').length > 2) {
+             // Heuristic: if it starts with an article and isn't a question, it's likely an image prompt.
+             // You can make this smarter later if needed.
+             // For now, we rely on the keywords above primarily.
+        }
+    }
+    return false;
 }
 
 function isVideoGenerationRequest(text) {
-    const keywords = ['generate video', 'create a video', 'make a video', 'animate'];
-    return keywords.some(kw => text.toLowerCase().includes(kw));
+    const lowerCaseText = text.toLowerCase();
+    const keywords = ['video of', 'generate a video', 'create a video', 'make a video', 'animate'];
+    return keywords.some(kw => lowerCaseText.includes(kw));
 }
 
 async function generateImage(prompt) {
@@ -499,7 +521,7 @@ async function generateImage(prompt) {
         throw new Error("OpenAI API key is not set. Please add it in settings.");
     }
 
-    const cleanPrompt = prompt.replace(/generate image|create an image|draw a picture|make an image of|visualize/gi, "").trim();
+    const cleanPrompt = prompt.replace(/generate|create|make|draw|an image of|a picture of|a photo of/gi, "").trim();
     
     if (apiProvider === 'openai') {
         // Use OpenAI DALL-E 3 API
@@ -525,30 +547,26 @@ async function generateImage(prompt) {
         return data.data[0].url;
     } else { 
         // Use a free, public proxy for Google's Imagen model
-        // This allows image generation without needing a complex Vertex AI setup
         const response = await fetch(
             `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}`
         );
         if (!response.ok) {
             throw new Error("Gemini (proxy) image generation failed.");
         }
-        // The URL of the response is the image itself
         return response.url;
     }
 }
 
 async function generateVideo(prompt) {
-    // This feature is exclusive to OpenAI in this app
     if (apiProvider !== 'openai') {
         throw new Error("Video generation is only available with OpenAI. Please switch the provider in settings.");
     }
-    // Inform user and fallback to a dynamic image with DALL-E 3
     addMessage('ai', "True text-to-video is still experimental. I will generate a dynamic, cinematic image for you instead.");
     return await generateImage(prompt + ", cinematic, dynamic action scene, high detail, 4k");
 }
 
-
 // END OF PART 7
+
 
 
 
