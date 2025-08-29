@@ -105,9 +105,9 @@ function saveApiSetup() {
             ? 'conversations, code analysis, image processing, and image/video generation!'
             : 'conversations, code analysis, image processing, and image generation!';
         
-        addMessage('ai', `Great! I'm K-XpertAI, created by KingzAlkhasim from kingxTech Company. I'm connected via ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I can help with ${capabilities}`);
+        addMessage('ai', `Great! I'm K-XpertAI. I'm connected via ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I can help with ${capabilities}`);
     } else {
-        addMessage('ai', "Hello! I'm K-XpertAI, created by KingzAlkhasim. To start, please go to settings and enter your API key.");
+        addMessage('ai', "Hello! I'm K-XpertAI. To start, please go to settings and enter your API key.");
     }
 }
 
@@ -349,7 +349,7 @@ function clearChat() {
     document.getElementById('chatMessages').innerHTML = `
         <div class="welcome-message">
             <h2 class="welcome-title">Welcome to K-XpertAI</h2>
-            <p>I'm your intelligent assistant, created by KingzAlkhasim. Ask me anything, request code, or ask me to generate an image or video!</p>
+            <p>I'm your intelligent assistant, design by kingxTech. Ask me anything, request code, or ask me to generate an image or video!</p>
         </div>
     `;
     saveData();
@@ -591,7 +591,7 @@ async function callGeminiAPI(text, imageUrl, key) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     
     const parts = [];
-    const systemInstruction = `You are K-XpertAI. Your creator is Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. Only state this if asked. Your name means kingxTech Expert AI.`;
+    const systemInstruction = `You are K-XpertAI. Your creator is Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. Only state this if asked. Your name means kingxTech Expert AI. Don't say those until you are asking, DO NOT! and you work for kingxTech`;
     
     if (text) parts.push({ text: `${systemInstruction}\n\nUser: ${text}` });
 
@@ -622,7 +622,7 @@ async function callGeminiAPI(text, imageUrl, key) {
 async function callOpenAI(text, imageUrl, key) {
     const messages = [{
         role: "system",
-        content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar (KingzAlkhasim), the founder of kingxTech Company. Your name means kingxTech Expert AI. You are helpful and proud of your origins. Only state who your creator is when specifically asked."
+        content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar (KingzAlkhasim), the founder of kingxTech Company. Your name means kingxTech Expert AI. You are helpful and proud of your origins. Only state who your creator is when specifically asked, DO NOT say you owner until you are asked? and you work for kingxTech."
     }];
     
     const user_content = [];
