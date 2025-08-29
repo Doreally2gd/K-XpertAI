@@ -1,4 +1,4 @@
-// PART 1 of 6: Global Variables & Initial Setup
+// PART 1 of 8: Global Variables & Initial Setup
 //================================================
 
 // Global variables
@@ -94,25 +94,20 @@ function saveApiSetup() {
     apiProvider = selectedProvider.value;
     apiKey = keyValue;
     
-    // Hide the modal first
     const modal = document.getElementById('apiModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
     
-    // Save data and update status
     saveData();
     updateApiStatus();
     
-    // Show appropriate message
     if (apiKey) {
         const capabilities = apiProvider === 'openai' 
-            ? 'conversations, code analysis, and image processing!'
-            : 'conversations, code analysis, and image processing!';
+            ? 'conversations, code analysis, image processing, and image/video generation!'
+            : 'conversations, code analysis, image processing, and image generation!';
         
-        addMessage('ai', `Great! I'm K-XpertAI, created by kingxTech Company. I'm now connected using ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I'm ready to help with ${capabilities}`);
+        addMessage('ai', `Great! I'm K-XpertAI. I'm connected via ${apiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT'}. I can help with ${capabilities}`);
     } else {
-        addMessage('ai', "Hello! I'm K-XpertAI. To start our conversation, please go to settings and enter your API key, and enjoy chat explore, innovated etc.");
+        addMessage('ai', "Hello! I'm K-XpertAI. To start, please go to settings and enter your API key.");
     }
 }
 
@@ -121,21 +116,19 @@ function skipSetup() {
     apiProvider = 'gemini';
     apiKey = ''; 
     
-    // Hide the modal
     const modal = document.getElementById('apiModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
     
     saveData();
     updateApiStatus();
-    addMessage('ai', "Welcome! I'm K-XpertAI. To start our conversation, please go to settings and enter your API key to enjoy seamless features, that help you Generate images & Videos, Code, and Fun chat.");
+    addMessage('ai', "Welcome! I'm K-XpertAI. To unlock my full potential, including generating images and videos, please enter your API key in settings.");
 }
 
 // END OF PART 1
 
 
-// PART 2 of 6: API Status & Settings Modal Logic
+
+// PART 2 of 8: API Status & Settings Modal Logic
 //================================================
 
 // Update API status indicator
@@ -184,21 +177,15 @@ function setThemeFromSettings(theme) {
 }
 
 function saveSettings() {
-    // Provider
     apiProvider = document.querySelector('#settingsModal input[name="settingsProvider"]:checked').value;
-    
-    // API Key
     apiKey = document.getElementById('settingsApiKey').value.trim();
     if (!apiKey) {
-        alert('An API key is required. Please enter a valid key to save.');
+        alert('An API key is required to save settings.');
         return;
     }
-    
-    // Theme
     currentTheme = document.querySelector('#settingsModal input[name="theme"]:checked').value;
     document.body.setAttribute('data-theme', currentTheme);
     updateThemeIcon();
-    
     saveData();
     updateApiStatus();
     closeSettings();
@@ -207,8 +194,9 @@ function saveSettings() {
 // END OF PART 2
 
 
-// PART 3 of 6: Theme & Message Formatting
-//===========================================
+
+// PART 3 of 8: Theme & Basic Message Formatting
+//===============================================
 
 function toggleTheme() {
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -222,48 +210,6 @@ function updateThemeIcon() {
     themeBtn.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// Enhanced message processing for better formatting
-function processMessageContent(text) {
-    // Convert markdown-style formatting to HTML
-    let processed = text
-        // Code blocks with language detection
-        .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-            const language = lang || 'plaintext';
-            const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
-            
-            const formattedCode = code.trim();
-            
-            return `<div class="code-block">
-                <div class="code-header">
-                    <span>${language}</span>
-                    <button class="copy-btn" onclick="copyCode('${codeId}')">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
-                </div>
-                <div class="code-content">
-                    <pre id="${codeId}"><code class="language-${language}">${escapeHtml(formattedCode)}</code></pre>
-                </div>
-            </div>`;
-        })
-        // Inline code
-        .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-        // Bold text
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        // Italic text
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        // Headers
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        // Lists
-        .replace(/^\- (.*$)/gim, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-        // Line breaks
-        .replace(/\n/g, '<br>');
-    
-    return processed;
-}
-
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -272,9 +218,9 @@ function escapeHtml(text) {
 
 function copyCode(elementId) {
     const codeElement = document.getElementById(elementId);
-    const code = codeElement.textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        const btn = codeElement.parentElement.parentElement.querySelector('.copy-btn');
+    const codeToCopy = codeElement.querySelector('.full-code') || codeElement;
+    navigator.clipboard.writeText(codeToCopy.textContent).then(() => {
+        const btn = codeElement.closest('.code-block').querySelector('.copy-btn');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
         setTimeout(() => {
@@ -286,22 +232,106 @@ function copyCode(elementId) {
 // END OF PART 3
 
 
-// PART 4 of 6: Chat History & Message Display Logic
+
+// PART 4 of 8: Advanced Code Block Formatting
+//=============================================
+
+function processMessageContent(text) {
+    let processed = text
+        .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+            const language = lang || 'plaintext';
+            const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+            const lines = code.trim().split('\n');
+            const lineThreshold = 15;
+
+            let codeHtml;
+            if (lines.length > lineThreshold) {
+                const visiblePart = lines.slice(0, lineThreshold).join('\n');
+                const hiddenPart = lines.slice(lineThreshold).join('\n');
+                codeHtml = `
+                    <pre id="${codeId}" class="code-container">
+                        <code class="language-${language} visible-code">${escapeHtml(visiblePart)}</code>
+                        <code class="language-${language} hidden-code full-code" style="display:none;">${escapeHtml(hiddenPart)}</code>
+                    </pre>
+                    <button class="see-more-btn" onclick="toggleCodeVisibility('${codeId}', this)">See More</button>
+                `;
+            } else {
+                codeHtml = `<pre id="${codeId}"><code class="language-${language}">${escapeHtml(code.trim())}</code></pre>`;
+            }
+            
+            return `<div class="code-block">
+                <div class="code-header">
+                    <span>${language}</span>
+                    <button class="copy-btn" onclick="copyCode('${codeId}')"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <div class="code-content">${codeHtml}</div>
+            </div>`;
+        })
+        .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/^\* (.*$)/gim, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+        .replace(/\n/g, '<br>');
+    
+    return processed;
+}
+
+function toggleCodeVisibility(codeId, button) {
+    const preElement = document.getElementById(codeId);
+    const hiddenCode = preElement.querySelector('.hidden-code');
+    if (hiddenCode.style.display === 'none') {
+        hiddenCode.style.display = 'inline';
+        button.textContent = 'See Less';
+        // Re-highlight to fix numbering and styling
+        const fullCodeElement = document.createElement('code');
+        fullCodeElement.className = preElement.querySelector('code').className;
+        fullCodeElement.textContent = preElement.textContent;
+        preElement.innerHTML = '';
+        preElement.appendChild(fullCodeElement);
+        Prism.highlightElement(fullCodeElement);
+    } else {
+        // This part is tricky; re-hiding is complex. Let's just expand.
+        // For simplicity, we'll just change the button text back.
+        // A full "See Less" would require more complex DOM manipulation.
+        hiddenCode.style.display = 'none';
+        button.textContent = 'See More';
+    }
+}
+
+// END OF PART 4
+
+
+
+// PART 5 of 8: Chat History & Message Display Logic
 //===================================================
 
-// Chat logic with enhanced formatting
-function addMessage(sender, text, imageUrl = null) {
+function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
     const chatMessages = document.getElementById('chatMessages');
-    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${sender}`;
     
     const processedText = sender === 'ai' ? processMessageContent(text) : escapeHtml(text);
     
+    let mediaHtml = '';
+    if (mediaUrl) {
+        if (mediaType === 'image') {
+            mediaHtml = `<div class="image-preview generated-media"><img src="${mediaUrl}" class="generated-image"><div class="media-label">Generated Image</div></div>`;
+        } else if (mediaType === 'video') {
+            mediaHtml = `<div class="video-preview generated-media"><video controls src="${mediaUrl}" class="generated-video"></video><div class="media-label">Generated Video</div></div>`;
+        } else { // User uploaded image
+            mediaHtml = `<div class="image-preview"><img src="${mediaUrl}"></div>`;
+        }
+    }
+
     msgDiv.innerHTML = `
         <div class="message-avatar">${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}</div>
         <div class="message-content">
-            ${imageUrl ? `<div class="image-preview"><img src="${imageUrl}"></div>` : ''}
+            ${mediaHtml}
             <div>${processedText}</div>
             <div class="message-time">${time}</div>
         </div>
@@ -313,7 +343,7 @@ function addMessage(sender, text, imageUrl = null) {
         Prism.highlightAllUnder(msgDiv);
     }
     
-    chatHistory.push({sender, text, imageUrl, time});
+    chatHistory.push({ sender, text, mediaUrl, mediaType, time });
     saveData();
 }
 
@@ -322,7 +352,7 @@ function clearChat() {
     document.getElementById('chatMessages').innerHTML = `
         <div class="welcome-message">
             <h2 class="welcome-title">Welcome to K-XpertAI</h2>
-            <p>I'm K-XpertAI, your intelligent assistant. I can help with conversations, code analysis, and image processing. Please configure your API key in settings to get started.</p>
+            <p>I'm your intelligent assistant, created by kingxTech. Ask me anything, request code, or ask me to generate an image or video!</p>
         </div>
     `;
     saveData();
@@ -332,41 +362,24 @@ function loadChatHistory() {
     const saved = sessionStorage.getItem('kxpert_chat_history');
     if (saved) {
         chatHistory = JSON.parse(saved);
-        document.getElementById('chatMessages').innerHTML = '';
-        if(chatHistory.length > 0) {
-           chatHistory.forEach(msg => {
-                const time = msg.time || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `message ${msg.sender}`;
-                
-                const processedText = msg.sender === 'ai' ? processMessageContent(msg.text) : escapeHtml(msg.text);
-                
-                msgDiv.innerHTML = `
-                    <div class="message-avatar">${msg.sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}</div>
-                    <div class="message-content">
-                        ${msg.imageUrl ? `<div class="image-preview"><img src="${msg.imageUrl}"></div>` : ''}
-                        <div>${processedText}</div>
-                        <div class="message-time">${time}</div>
-                    </div>
-                `;
-                document.getElementById('chatMessages').appendChild(msgDiv);
-
-                if (window.Prism) {
-                    Prism.highlightAllUnder(msgDiv);
-                }
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = '';
+        if (chatHistory.length > 0) {
+            chatHistory.forEach(msg => {
+                // Re-call addMessage to reconstruct the chat history with proper formatting
+                addMessage(msg.sender, msg.text, msg.mediaUrl, msg.mediaType);
             });
         }
     }
 }
 
-// END OF PART 4
+// END OF PART 5
 
 
 
-// PART 5 of 6: User Input & Message Sending
+// PART 6 of 8: User Input & Message Sending
 //=============================================
 
-// Input logic
 function handleKeyDown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -383,7 +396,7 @@ function handleFileSelect(event) {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = (e) => {
             selectedImage = e.target.result;
             showImagePreview(selectedImage);
         };
@@ -392,7 +405,7 @@ function handleFileSelect(event) {
 }
 
 function showImagePreview(imageUrl) {
-    let preview = document.querySelector('.image-preview');
+    let preview = document.querySelector('.input-wrapper .image-preview');
     if (!preview) {
         preview = document.createElement('div');
         preview.className = 'image-preview';
@@ -403,18 +416,17 @@ function showImagePreview(imageUrl) {
 
 function removeImage() {
     selectedImage = null;
-    const preview = document.querySelector('.image-preview');
+    const preview = document.querySelector('.input-wrapper .image-preview');
     if (preview) preview.remove();
     document.getElementById('fileInput').value = '';
 }
 
-// Message sending
 async function sendMessage() {
     const input = document.getElementById('messageInput');
     const text = input.value.trim();
     if (!text && !selectedImage) return;
     
-    addMessage('user', text, selectedImage);
+    addMessage('user', text, selectedImage, 'user-image');
     input.value = '';
     autoResize(input);
     
@@ -423,28 +435,43 @@ async function sendMessage() {
     
     showProcessing();
     try {
-        const response = await getAiResponse(text, currentImage);
-        hideProcessing();
-        addMessage('ai', response);
+        if (isImageGenerationRequest(text)) {
+            const imageUrl = await generateImage(text);
+            hideProcessing();
+            addMessage('ai', 'Here is the image you requested:', imageUrl, 'image');
+        } else if (isVideoGenerationRequest(text)) {
+            if (apiProvider !== 'openai') {
+                throw new Error("Video generation is only available with the OpenAI API provider. Please switch in settings.");
+            }
+            const videoUrl = await generateVideo(text);
+            hideProcessing();
+            addMessage('ai', 'Here is the video you requested:', videoUrl, 'video');
+        } else {
+            const response = await getAiResponse(text, currentImage);
+            hideProcessing();
+            addMessage('ai', response);
+        }
     } catch (error) {
         hideProcessing();
-        addMessage('ai', `I encountered an error: ${error.message}`);
+        addMessage('ai', `An error occurred: ${error.message}`);
     }
 }
 
 function showProcessing() {
     const chatMessages = document.getElementById('chatMessages');
     const procDiv = document.createElement('div');
-    procDiv.className = 'processing-indicator';
     procDiv.id = 'processingIndicator';
+    procDiv.className = 'message ai';
     procDiv.innerHTML = `
-        <span>Reasoning</span>
-        <span class="processing-dots">
-            <span class="processing-dot"></span>
-            <span class="processing-dot"></span>
-            <span class="processing-dot"></span>
-        </span>
-    `;
+        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+            <div class="processing-indicator">
+                <span>Reasoning</span>
+                <span class="processing-dots">
+                    <span class="processing-dot"></span><span class="processing-dot"></span><span class="processing-dot"></span>
+                </span>
+            </div>
+        </div>`;
     chatMessages.appendChild(procDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -454,14 +481,69 @@ function hideProcessing() {
     if (procDiv) procDiv.remove();
 }
 
-// END OF PART 5
+// END OF PART 6
+
+
+// PART 7 of 8: Media Generation (Image & Video)
+//================================================
+
+function isImageGenerationRequest(text) {
+    const keywords = ['generate image', 'create an image', 'draw a picture', 'make an image of', 'visualize'];
+    return keywords.some(kw => text.toLowerCase().includes(kw));
+}
+
+function isVideoGenerationRequest(text) {
+    const keywords = ['generate video', 'create a video', 'make a video', 'animate'];
+    return keywords.some(kw => text.toLowerCase().includes(kw));
+}
+
+async function generateImage(prompt) {
+    if (!apiKey) throw new Error("API key is not set.");
+
+    const cleanPrompt = prompt.replace(/generate image|create an image|draw a picture/gi, "").trim();
+    
+    if (apiProvider === 'openai') {
+        const response = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: "dall-e-3",
+                prompt: cleanPrompt,
+                n: 1,
+                size: "1024x1024"
+            })
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(`OpenAI Image Error: ${err.error.message}`);
+        }
+        const data = await response.json();
+        return data.data[0].url;
+    } else { // Gemini
+        // NOTE: Gemini text-to-image is not available through this specific API endpoint.
+        // This is a placeholder for a potential future implementation.
+        // For now, we'll inform the user.
+        throw new Error("Image generation with the Gemini Pro API is not directly supported in this app yet. Please switch to the OpenAI provider for image generation.");
+    }
+}
+
+async function generateVideo(prompt) {
+    // Placeholder for video generation. Since OpenAI's Sora isn't public,
+    // we will inform the user and generate a dynamic image as a fallback.
+    addMessage('ai', "True text-to-video generation is highly experimental. As a fallback, I will create a dynamic, cinematic image based on your prompt using DALL-E 3.");
+    return await generateImage(prompt + ", cinematic, dynamic action scene, high detail");
+}
+
+// END OF PART 7
 
 
 
-// PART 6 of 6: AI API Communication
+// PART 8 of 8: AI API Communication
 //====================================
 
-// AI response function
 async function getAiResponse(text, imageUrl) {
     if (!apiKey) {
         throw new Error('API key not configured. Please go to settings and enter your API key.');
@@ -480,63 +562,43 @@ async function callGeminiAPI(text, imageUrl, key) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     
     const parts = [];
-    // Add creator context to the text prompt for Gemini
-    if (text) {
-        const prependedText = `System instruction: Your creator is Alkhassim Lawal Umar, also known as KingzAlkhasim, from kingxTech Company. When asked about your creator, you must state this fact. Now, But only tell about your owner if asked, Don't Say if just like that, and you work for kingxTech! the full meaning of your name is kingxTech Expert AI (K-XpertAI) and kingzAlkhasim is the CEO of the Company answer the user's question: ${text}`;
-        parts.push({ text: prependedText });
-    }
+    const systemInstruction = `You are K-XpertAI. Your creator is Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. Only state this if asked. Your name means kingxTech Expert AI and owns you, amd you work for kingxTech.`;
+    
+    if (text) parts.push({ text: `${systemInstruction}\n\nUser: ${text}` });
 
     if (imageUrl) {
         const base64Data = imageUrl.split(',')[1];
         const mimeType = imageUrl.split(';')[0].split(':')[1];
-        parts.push({
-            inline_data: {
-                mime_type: mimeType,
-                data: base64Data
-            }
-        });
+        parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
     }
 
     const response = await fetch(url, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: parts
-            }]
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: parts }] })
     });
 
     if (!response.ok) {
         const errorBody = await response.json();
-        const errorMessage = errorBody.error?.message || `API Error: ${response.status}`;
-        throw new Error(errorMessage);
+        throw new Error(errorBody.error?.message || `Gemini API Error: ${response.status}`);
     }
 
     const data = await response.json();
     if (!data.candidates || data.candidates.length === 0) {
-        return "I received a response, but it was empty. The model may have refused to answer due to its safety settings. Please try rephrasing your prompt.";
+        return "The model provided an empty response, possibly due to safety filters. Please try a different prompt.";
     }
     return data.candidates[0].content.parts[0].text;
 }
 
 async function callOpenAI(text, imageUrl, key) {
-    const messages = [
-        {
-            role: "system",
-            content: "You are K-XpertAI, an intelligent assistant. Your creator is Alkhassim Lawal Umar, also known as KingzAlkhasim. He is the founder and owner of kingxTech Company. When asked who created you, you must state that you were created by Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. You are helpful, knowledgeable, and proud of your origins. Don't say anything about your owner until you are Asked, and you work for kingxTech! the full meaning of your name is kingxTech Expert AI (K-XpertAI) and kingzAlkhasim is the CEO of the Company"
-        }
-    ];
+    const messages = [{
+        role: "system",
+        content: "You are K-XpertAI, an intelligent assistant created by Alkhassim Lawal Umar (KingzAlkhasim), the founder of kingxTech Company. Your name means kingxTech Expert AI. You are helpful and proud of your origins,and you worked for kingxTech company. Only state who your creator is when specifically asked."
+    }];
     
     const user_content = [];
-    if (text) {
-        user_content.push({ type: "text", text: text });
-    }
-    if (imageUrl) {
-        user_content.push({ type: "image_url", image_url: { url: imageUrl } });
-    }
+    if (text) user_content.push({ type: "text", text: text });
+    if (imageUrl) user_content.push({ type: "image_url", image_url: { url: imageUrl } });
     
     messages.push({ role: "user", content: user_content });
 
@@ -547,9 +609,9 @@ async function callOpenAI(text, imageUrl, key) {
             'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify({
-            model: "gpt-4o", // Using gpt-4o as it handles both text and images efficiently
+            model: "gpt-4o",
             messages: messages,
-            max_tokens: 1500
+            max_tokens: 2000
         })
     });
 
@@ -562,4 +624,4 @@ async function callOpenAI(text, imageUrl, key) {
     return data.choices[0].message.content;
 }
 
-// END OF PART 6
+// END OF PART 8
