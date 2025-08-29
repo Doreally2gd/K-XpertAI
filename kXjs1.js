@@ -373,111 +373,6 @@ function loadChatHistory() {
 
 
 
-// PART 6 of 8: User Input & Message Sending
-//=============================================
-
-function handleKeyDown(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
-    }
-}
-
-function autoResize(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = (textarea.scrollHeight) + 'px';
-}
-
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            selectedImage = e.target.result;
-            showImagePreview(selectedImage);
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function showImagePreview(imageUrl) {
-    let preview = document.querySelector('.input-wrapper .image-preview');
-    if (!preview) {
-        preview = document.createElement('div');
-        preview.className = 'image-preview';
-        document.querySelector('.input-wrapper').insertBefore(preview, document.getElementById('messageInput'));
-    }
-    preview.innerHTML = `<img src="${imageUrl}"><button class="remove-image" onclick="removeImage()" title="Remove">&times;</button>`;
-}
-
-function removeImage() {
-    selectedImage = null;
-    const preview = document.querySelector('.input-wrapper .image-preview');
-    if (preview) preview.remove();
-    document.getElementById('fileInput').value = '';
-}
-
-async function sendMessage() {
-    const input = document.getElementById('messageInput');
-    const text = input.value.trim();
-    if (!text && !selectedImage) return;
-    
-    addMessage('user', text, selectedImage, 'user-image');
-    input.value = '';
-    autoResize(input);
-    
-    const currentImage = selectedImage;
-    removeImage();
-    
-    showProcessing();
-    try {
-        if (isImageGenerationRequest(text)) {
-            const imageUrl = await generateImage(text);
-            hideProcessing();
-            addMessage('ai', 'Here is the image you requested:', imageUrl, 'image');
-        } else if (isVideoGenerationRequest(text)) {
-            if (apiProvider !== 'openai') {
-                throw new Error("Video generation is only available with the OpenAI API provider. Please switch in settings.");
-            }
-            const videoUrl = await generateVideo(text);
-            hideProcessing();
-            addMessage('ai', 'Here is the video you requested:', videoUrl, 'video');
-        } else {
-            const response = await getAiResponse(text, currentImage);
-            hideProcessing();
-            addMessage('ai', response);
-        }
-    } catch (error) {
-        hideProcessing();
-        addMessage('ai', `An error occurred: ${error.message}`);
-    }
-}
-
-function showProcessing() {
-    const chatMessages = document.getElementById('chatMessages');
-    const procDiv = document.createElement('div');
-    procDiv.id = 'processingIndicator';
-    procDiv.className = 'message ai';
-    procDiv.innerHTML = `
-        <div class="message-avatar"><i class="fas fa-robot"></i></div>
-        <div class="message-content">
-            <div class="processing-indicator">
-                <span>Reasoning</span>
-                <span class="processing-dots">
-                    <span class="processing-dot"></span><span class="processing-dot"></span><span class="processing-dot"></span>
-                </span>
-            </div>
-        </div>`;
-    chatMessages.appendChild(procDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function hideProcessing() {
-    const procDiv = document.getElementById('processingIndicator');
-    if (procDiv) procDiv.remove();
-}
-
-// END OF PART 6
 
 
 // PART 7 of 8: Media Generation (Image & Video)
@@ -566,6 +461,127 @@ async function generateVideo(prompt) {
 }
 
 // END OF PART 7
+
+
+
+// PART 6 of 8: User Input & Message Sending
+//=============================================
+
+function handleKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight) + 'px';
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            selectedImage = e.target.result;
+            showImagePreview(selectedImage);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function showImagePreview(imageUrl) {
+    let preview = document.querySelector('.input-wrapper .image-preview');
+    if (!preview) {
+        preview = document.createElement('div');
+        preview.className = 'image-preview';
+        document.querySelector('.input-wrapper').insertBefore(preview, document.getElementById('messageInput'));
+    }
+    preview.innerHTML = `<img src="${imageUrl}"><button class="remove-image" onclick="removeImage()" title="Remove">&times;</button>`;
+}
+
+function removeImage() {
+    selectedImage = null;
+    const preview = document.querySelector('.input-wrapper .image-preview');
+    if (preview) preview.remove();
+    document.getElementById('fileInput').value = '';
+}
+
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text && !selectedImage) return;
+    
+    addMessage('user', text, selectedImage, 'user-image');
+    input.value = '';
+    autoResize(input);
+    
+    const currentImage = selectedImage;
+    removeImage();
+    
+    showProcessing();
+    try {
+        if (isImageGenerationRequest(text)) {
+            const imageUrl = await generateImage(text);
+            hideProcessing();
+
+            // --- NEW: Dynamic Response Logic ---
+            const responses = [
+                "Here is the image you requested! What do you think?",
+                "I've created this for you! Let me know if you'd like any adjustments.",
+                "Voilà! How does this look? If you want to change anything, just let me know.",
+                "I brought your idea to life! Do you want to iterate on this?",
+                "Here you go! Feel free to ask for a different version by describing the changes."
+            ];
+            const dynamicResponse = responses[Math.floor(Math.random() * responses.length)];
+            // --- End of New Logic ---
+
+            addMessage('ai', dynamicResponse, imageUrl, 'image'); // Use the new dynamic response
+            
+        } else if (isVideoGenerationRequest(text)) {
+            if (apiProvider !== 'openai') {
+                throw new Error("Video generation is only available with the OpenAI API provider. Please switch in settings.");
+            }
+            const videoUrl = await generateVideo(text);
+            hideProcessing();
+            addMessage('ai', 'Here is the video you requested:', videoUrl, 'video');
+        } else {
+            const response = await getAiResponse(text, currentImage);
+            hideProcessing();
+            addMessage('ai', response);
+        }
+    } catch (error) {
+        hideProcessing();
+        addMessage('ai', `An error occurred: ${error.message}`);
+    }
+}
+
+function showProcessing() {
+    const chatMessages = document.getElementById('chatMessages');
+    const procDiv = document.createElement('div');
+    procDiv.id = 'processingIndicator';
+    procDiv.className = 'message ai';
+    procDiv.innerHTML = `
+        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+            <div class="processing-indicator">
+                <span>Thinking</span>
+                <span class="processing-dots">
+                    <span class="processing-dot"></span><span class="processing-dot"></span><span class="processing-dot"></span>
+                </span>
+            </div>
+        </div>`;
+    chatMessages.appendChild(procDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function hideProcessing() {
+    const procDiv = document.getElementById('processingIndicator');
+    if (procDiv) procDiv.remove();
+}
+
+// END OF PART 6
 
 
 
