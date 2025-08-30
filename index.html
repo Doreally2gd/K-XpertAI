@@ -845,6 +845,13 @@
         </div>
     </div>
 
+
+<div id="imagePreviewModal" class="modal-overlay" onclick="closeImagePreview()">
+    <span class="close-btn" onclick="closeImagePreview()">&times;</span>
+    <img class="modal-content" id="fullImagePreview">
+</div>
+
+
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js");
