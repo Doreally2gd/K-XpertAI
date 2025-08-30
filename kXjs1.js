@@ -306,6 +306,47 @@ function toggleCodeVisibility(codeId, button) {
 // PART 5 of 8: Chat History & Message Display Logic
 //===================================================
 
+// --- NEW Image Helper Functions ---
+function openImagePreview(imageUrl) {
+    const modal = document.getElementById('imagePreviewModal');
+    const modalImg = document.getElementById('fullImagePreview');
+    modal.style.display = 'flex';
+    modalImg.src = imageUrl;
+}
+
+function closeImagePreview() {
+    const modal = document.getElementById('imagePreviewModal');
+    modal.style.display = 'none';
+}
+
+async function downloadImage(event, imageUrl) {
+    event.stopPropagation(); // Prevents the preview from opening when clicking download
+    try {
+        // Fetch the image data
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        
+        // Create an object URL from the blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a temporary link to trigger the download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `K-XpertAI-Image-${Date.now()}.png`; // Set a filename
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Download failed:', error);
+        addMessage('ai', "Sorry, I couldn't download that image due to a browser security policy (CORS). You can try right-clicking the image and saving it manually.");
+    }
+}
+// --- End of New Functions ---
+
+
 function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
     const chatMessages = document.getElementById('chatMessages');
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -317,11 +358,19 @@ function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
     let mediaHtml = '';
     if (mediaUrl) {
         if (mediaType === 'image') {
-            mediaHtml = `<div class="image-preview generated-media"><img src="${mediaUrl}" class="generated-image"><div class="media-label">Generated Image</div></div>`;
+            // Updated to include onclick for preview and a download button
+            mediaHtml = `
+                <div class="image-preview generated-media" onclick="openImagePreview('${mediaUrl}')">
+                    <img src="${mediaUrl}" class="generated-image">
+                    <div class="media-label">Generated Image</div>
+                    <button class="download-btn" onclick="downloadImage(event, '${mediaUrl}')" title="Download Image">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>`;
         } else if (mediaType === 'video') {
             mediaHtml = `<div class="video-preview generated-media"><video controls src="${mediaUrl}" class="generated-video"></video><div class="media-label">Generated Video</div></div>`;
         } else { // User uploaded image
-            mediaHtml = `<div class="image-preview"><img src="${mediaUrl}"></div>`;
+            mediaHtml = `<div class="image-preview" onclick="openImagePreview('${mediaUrl}')"><img src="${mediaUrl}"></div>`;
         }
     }
 
@@ -349,7 +398,7 @@ function clearChat() {
     document.getElementById('chatMessages').innerHTML = `
         <div class="welcome-message">
             <h2 class="welcome-title">Welcome to K-XpertAI</h2>
-            <p>I'm your intelligent assistant, design by kingxTech. Ask me anything, request code, or ask me to generate an image or video!</p>
+            <p>I'm your intelligent assistant, created by KingzAlkhasim. Ask me anything, request code, or ask me to generate an image or video!</p>
         </div>
     `;
     saveData();
