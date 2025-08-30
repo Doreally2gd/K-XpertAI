@@ -11,6 +11,108 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <style>
+
+
+
+/* --- Add this to your CSS file --- */
+
+/* Make generated images in the chat bigger and clickable */
+.generated-image {
+    max-width: 320px; /* Increased from default */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.generated-image:hover {
+    transform: scale(1.03);
+}
+
+/* Style for the generated media container */
+.generated-media {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+/* Style for the download button */
+.download-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.generated-media:hover .download-btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.download-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+
+/* Styles for the Image Preview Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90vh;
+    animation: zoomIn 0.3s ease-in-out;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-overlay .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.modal-overlay .close-btn:hover {
+    color: #bbb;
+}
+
+
+
+
         * {
             margin: 0;
             padding: 0;
