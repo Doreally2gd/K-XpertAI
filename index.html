@@ -13,8 +13,45 @@
     <style>
 
 
+/* Fixes line breaks in messages */
+.message-content > .message-text-content {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
 
-/* --- Add this to your CSS file --- */
+/* Styles for the new Text-to-Speech Button */
+.tts-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    font-size: 14px;
+    float: right;
+    margin-left: 8px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.tts-btn:hover {
+    opacity: 1;
+}
+
+/* Styles for the AI Typing Animation Cursor */
+.typing-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.2em;
+    background-color: var(--text-color);
+    animation: blink 1s step-end infinite;
+    vertical-align: bottom;
+}
+
+@keyframes blink {
+    from, to { background-color: transparent; }
+    50% { background-color: var(--text-color); }
+}
+
+
 
 /* Make generated images in the chat bigger and clickable */
 .generated-image {
