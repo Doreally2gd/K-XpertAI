@@ -615,7 +615,7 @@ function showProcessing() {
         <div class="message-avatar"><i class="fas fa-robot"></i></div>
         <div class="message-content">
             <div class="processing-indicator">
-                <span>Thinking</span>
+                <span></span>
                 <span class="processing-dots">
                     <span class="processing-dot"></span><span class="processing-dot"></span><span class="processing-dot"></span>
                 </span>
