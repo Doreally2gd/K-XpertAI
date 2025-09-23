@@ -1,44 +1,68 @@
-/* --- AI Generated Media Styles --- */
+/* --- FIX FOR AI MESSAGE BUBBLE --- */
 
-/* This is the container for the generated image or video */
-.generated-media {
-    position: relative; /* This is crucial for positioning the button */
-    cursor: pointer;
-    overflow: hidden; /* Keeps everything tidy inside the rounded corners */
+/* 1. Remove the default bubble from the main AI message content */
+.message.ai .message-content {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }
 
-/* This styles the download button itself */
-.download-btn {
-    position: absolute; /* Positions the button on top of the image */
-    bottom: 8px;        /* 8px from the bottom */
-    right: 8px;         /* 8px from the right */
-    z-index: 10;        /* Ensures it's on top of other elements */
-    
-    /* Visual styling */
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
-    
-    /* Flexbox to center the icon perfectly */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    transition: background-color 0.2s ease;
+/* 2. Add the bubble style ONLY to code blocks inside an AI message */
+.message.ai .code-block {
+  padding: 0; /* The code block's inner padding is already handled */
+  background-color: var(--background-color-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden; /* Ensures the corners are rounded correctly */
+  margin-top: 8px; /* Adds space between text and code */
 }
 
-.download-btn:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+
+/* --- FIX FOR LARGE IMAGE PREVIEW IN TYPING AREA --- */
+
+/* The container for the preview */
+.input-wrapper .image-preview {
+  position: relative;
+  max-height: 90px;
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 4px;
+  background-color: var(--background-color-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-/* Make sure your Font Awesome is working! */
-/* If the icon is still missing, ensure this line is in the <head> of your index.html file: */
-/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> */
+/* The image itself inside the preview */
+.input-wrapper .image-preview img {
+  max-height: 80px;
+  border-radius: 6px;
+  display: block;
+}
+
+/* The small 'x' button to remove the image */
+.input-wrapper .remove-image {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.input-wrapper .remove-image:hover {
+  opacity: 1;
+}
 
 
 
