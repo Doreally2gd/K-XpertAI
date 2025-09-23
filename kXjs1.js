@@ -334,16 +334,23 @@ function closeImagePreview() {
 }
 
 async function downloadImage(event, imageUrl) {
-    event.stopPropagation();
+    event.stopPropagation(); // Prevents the preview from opening when clicking download
     try {
+        // Fetch the image data
         const response = await fetch(imageUrl);
         const blob = await response.blob();
+        
+        // Create an object URL from the blob
         const url = window.URL.createObjectURL(blob);
+        
+        // Create a temporary link to trigger the download
         const link = document.createElement('a');
         link.href = url;
-        link.download = `K-XpertAI-Image-${Date.now()}.png`;
+        link.download = `K-XpertAI-Image-${Date.now()}.png`; // Set a filename
         document.body.appendChild(link);
         link.click();
+        
+        // Clean up
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -351,10 +358,10 @@ async function downloadImage(event, imageUrl) {
         addMessage('ai', "Sorry, I couldn't download that image due to a browser security policy (CORS). You can try right-clicking the image and saving it manually.");
     }
 }
-// --- End of Functions ---
+// --- End of Image Helper Functions ---
 
 
-// UPDATED: This function adds the Text-to-Speech button
+// UPDATED: This is the main function for adding any message to the chat.
 function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
     const chatMessages = document.getElementById('chatMessages');
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -366,6 +373,7 @@ function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
     let mediaHtml = '';
     if (mediaUrl) {
         if (mediaType === 'image') {
+            // This is for AI-generated images, including the download button.
             mediaHtml = `
                 <div class="image-preview generated-media" onclick="openImagePreview('${mediaUrl}')">
                     <img src="${mediaUrl}" class="generated-image">
@@ -376,22 +384,25 @@ function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
                 </div>`;
         } else if (mediaType === 'video') {
             mediaHtml = `<div class="video-preview generated-media"><video controls src="${mediaUrl}" class="generated-video"></video><div class="media-label">Generated Video</div></div>`;
-        } else { // User uploaded image
+        } else { // This is for the user's uploaded image.
             mediaHtml = `<div class="image-preview" onclick="openImagePreview('${mediaUrl}')"><img src="${mediaUrl}"></div>`;
         }
     }
 
-    const speakerButton = sender === 'ai' && text.trim().length > 0
-        ? `<button class="tts-btn" onclick="readMessage(this)" title="Read aloud"><i class="fas fa-volume-up"></i></button>`
-        : '';
+    // NEW: The speaker button is now part of the footer, not the main content.
+    const messageFooter = sender === 'ai' && text.trim().length > 0
+        ? `<div class="message-footer">
+               <div class="message-time">${time}</div>
+               <button class="tts-btn" onclick="readMessage(this)" title="Read aloud"><i class="fas fa-volume-up"></i></button>
+           </div>`
+        : `<div class="message-footer"><div class="message-time">${time}</div></div>`;
 
     msgDiv.innerHTML = `
         <div class="message-avatar">${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}</div>
         <div class="message-content">
-            ${speakerButton}
             ${mediaHtml}
             <div class="message-text-content">${processedText}</div>
-            <div class="message-time">${time}</div>
+            ${messageFooter}
         </div>
     `;
     chatMessages.appendChild(msgDiv);
@@ -401,9 +412,8 @@ function addMessage(sender, text, mediaUrl = null, mediaType = 'image') {
         Prism.highlightAllUnder(msgDiv);
     }
     
-    // Typing animation handles its own history saving, so we check if the message already exists.
-    // This is a simple check; a more robust way would be to pass an ID.
-    if (sender === 'user' || (sender === 'ai' && !mediaUrl)) {
+    // Logic to prevent duplicating history entries from the typing animation.
+    if (sender === 'user' || mediaUrl) {
         chatHistory.push({ sender, text, mediaUrl, mediaType, time });
         saveData();
     }
@@ -422,52 +432,66 @@ function clearChat() {
 }
 
 function loadChatHistory() {
-    const saved = localStorage.getItem('kxpert_chat_history'); // using localStorage now
+    const saved = localStorage.getItem('kxpert_chat_history');
     if (saved) {
         chatHistory = JSON.parse(saved);
         const chatMessages = document.getElementById('chatMessages');
-        chatMessages.innerHTML = ''; // Clear initial welcome
+        chatMessages.innerHTML = '';
         if (chatHistory.length > 0) {
             chatHistory.forEach(msg => {
-                // Call original add logic without typing animation for history
+                // For loading history, we call a simplified add function to avoid animations.
                 addHistoricMessage(msg.sender, msg.text, msg.mediaUrl, msg.mediaType, msg.time);
             });
         }
     }
 }
 
-// Helper for loading history without triggering animations
+// This is a helper function to load history messages without animations.
 function addHistoricMessage(sender, text, mediaUrl, mediaType, time) {
     const chatMessages = document.getElementById('chatMessages');
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${sender}`;
+    
+    // Rebuild the message structure exactly like addMessage.
     const processedText = sender === 'ai' ? processMessageContent(text) : escapeHtml(text);
-    let mediaHtml = ''; // Rebuild media HTML as in addMessage
-    // ... (media html logic from addMessage can be copied here) ...
-    const speakerButton = sender === 'ai' && text.trim().length > 0 ? `<button class="tts-btn" onclick="readMessage(this)" title="Read aloud"><i class="fas fa-volume-up"></i></button>`: '';
+    let mediaHtml = ''; // (The media logic from addMessage should be here if you want to see history images)
+
+    const messageFooter = sender === 'ai' && text.trim().length > 0
+        ? `<div class="message-footer">
+               <div class="message-time">${time}</div>
+               <button class="tts-btn" onclick="readMessage(this)" title="Read aloud"><i class="fas fa-volume-up"></i></button>
+           </div>`
+        : `<div class="message-footer"><div class="message-time">${time}</div></div>`;
+        
     msgDiv.innerHTML = `
         <div class="message-avatar">${sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>'}</div>
         <div class="message-content">
-            ${speakerButton}
             ${mediaHtml}
             <div class="message-text-content">${processedText}</div>
-            <div class="message-time">${time}</div>
+            ${messageFooter}
         </div>`;
+        
     chatMessages.appendChild(msgDiv);
-    Prism.highlightAllUnder(msgDiv);
+    if (window.Prism) {
+        Prism.highlightAllUnder(msgDiv);
+    }
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 
-// NEW: Function for Text-to-Speech
+// NEW: Function for Text-to-Speech (reads the text content of the message).
 function readMessage(buttonElement) {
+    // Find the message text associated with the button.
     const messageContent = buttonElement.closest('.message-content');
     const textElement = messageContent.querySelector('.message-text-content');
 
     if (textElement && textElement.textContent) {
-        window.speechSynthesis.cancel(); // Stop any previous speech
+        // Stop any currently speaking utterance.
+        window.speechSynthesis.cancel();
+        
         const textToRead = textElement.textContent;
         const utterance = new SpeechSynthesisUtterance(textToRead);
+        
         window.speechSynthesis.speak(utterance);
     }
 }
