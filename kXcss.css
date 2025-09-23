@@ -1,3 +1,93 @@
+/* --- AI Generated Media Styles --- */
+
+/* This is the container for the generated image or video */
+.generated-media {
+    position: relative; /* This is crucial for positioning the button */
+    cursor: pointer;
+    overflow: hidden; /* Keeps everything tidy inside the rounded corners */
+}
+
+/* This styles the download button itself */
+.download-btn {
+    position: absolute; /* Positions the button on top of the image */
+    bottom: 8px;        /* 8px from the bottom */
+    right: 8px;         /* 8px from the right */
+    z-index: 10;        /* Ensures it's on top of other elements */
+    
+    /* Visual styling */
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    
+    /* Flexbox to center the icon perfectly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    transition: background-color 0.2s ease;
+}
+
+.download-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Make sure your Font Awesome is working! */
+/* If the icon is still missing, ensure this line is in the <head> of your index.html file: */
+/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> */
+
+
+
+
+
+
+
+
+/* --- Styles for the Message Footer and Repositioned Speaker Button --- */
+
+.message-footer {
+    display: flex;
+    justify-content: space-between; /* Pushes time to the left and button to the right */
+    align-items: center;
+    margin-top: 8px; /* Adds a little space above it */
+    padding: 0 4px;
+}
+
+.message-time {
+    font-size: 11px;
+    color: var(--text-color-secondary);
+    opacity: 0.8;
+}
+
+.tts-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    font-size: 14px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 2px; /* Makes it easier to click */
+}
+
+.tts-btn:hover {
+    opacity: 1;
+}
+
+/* Specific adjustment for user messages so the time is on the far right */
+.message.user .message-footer {
+    justify-content: flex-end;
+}
+
+
+
+
+
+
 /* Fixes line breaks in messages */
 .message-content > .message-text-content {
     white-space: pre-wrap;
