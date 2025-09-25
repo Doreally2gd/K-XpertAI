@@ -745,7 +745,6 @@ async function generateVideo(prompt) {
 
 // PART 8 of 8: AI API Communication
 //====================================
-// (No changes were made to this part)
 
 async function getAiResponse(text, imageUrl) {
     if (!apiKey) {
@@ -762,7 +761,8 @@ async function getAiResponse(text, imageUrl) {
 }
 
 async function callGeminiAPI(text, imageUrl, key) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    // UPDATED: Changed model to "gemini-1.5-flash-latest" to prevent version errors.
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
     
     const parts = [];
     const systemInstruction = `You are K-XpertAI. Your creator is Alkhassim Lawal Umar (KingzAlkhasim) of kingxTech Company. Only state this if asked. Your name means kingxTech Expert AI. Don't say those until you are asking, DO NOT! and you work for kingxTech`;
