@@ -1,3 +1,59 @@
+
+    /* --- PERMANENT FIX FOR AI MESSAGE BUBBLE --- */
+
+    /* 1. Remove the default bubble from the main AI message content */
+    .message.ai .message-content {
+      background-color: transparent !important;
+      padding: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* 2. Add the bubble style ONLY to code blocks inside an AI message */
+    .message.ai .code-block {
+      background-color: var(--background-color-secondary) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      margin-top: 8px !important;
+    }
+
+    /* --- PERMANENT FIX FOR THE DOWNLOAD BUTTON --- */
+
+    /* The container for the generated image */
+    .generated-media {
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    /* This styles the download button to make sure it is visible */
+    .download-btn {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        z-index: 10;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+    }
+
+    .download-btn:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+
+
+
 /* This is the code that fixes the bubble. Make sure it's in your CSS file. */
 
 /* 1. Remove the default bubble from the main AI message content */
