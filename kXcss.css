@@ -1,3 +1,25 @@
+/* This is the code that fixes the bubble. Make sure it's in your CSS file. */
+
+/* 1. Remove the default bubble from the main AI message content */
+.message.ai .message-content {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* 2. Add the bubble style ONLY to code blocks inside an AI message */
+.message.ai .code-block {
+  background-color: var(--background-color-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+
+
+
 /* --- FIX FOR AI MESSAGE BUBBLE --- */
 
 /* 1. Remove the default bubble from the main AI message content */
